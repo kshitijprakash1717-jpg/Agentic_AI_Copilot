@@ -2,7 +2,7 @@
 
 An end-to-end Forward Deployed Engineer (FDE) project that turns a notebook-style Agentic RAG workflow into a deployable internal product. This repository demonstrates how to build a secure IT Support Copilot that searches trusted private knowledge first, evaluates evidence quality, rewrites weak queries, and uses web search only when necessary.
 
-Key technologies: FastAPI, LangGraph, Groq (LLM), Pinecone (vector DB), HuggingFace embeddings, Tavily web search, SQLite audit log, Docker, and a simple HTML/CSS/JavaScript UI.
+Key technologies: FastAPI, LangGraph, Gemini (LLM and embeddings), Pinecone (vector DB), Tavily web search, SQLite audit log, Docker, and a simple HTML/CSS/JavaScript UI.
 
 ---
 
@@ -15,7 +15,7 @@ This project implements an "Agentic RAG" (Retrieval-Augmented Generation) workfl
 - Grades private evidence (GOOD / WEAK).
 - If evidence is WEAK, optionally performs a controlled web search (Tavily) and grades that evidence.
 - Rewrites queries and retries retrieval when necessary.
-- Produces grounded answers from Groq, and logs the decision path for transparency and debugging.
+- Uses Gemini and logs the decision path for transparency and debugging.
 
 Example problems solved:
 - "How do I connect to the company VPN from home?" (answer from private KB only)
@@ -26,7 +26,7 @@ Example problems solved:
 ## Features
 
 - Stateful routing and conditional decisions with LangGraph
-- Grounded generation using Groq LLM
+- Gemini model and embeddings
 - Private enterprise knowledge in Pinecone
 - Local 384-dim embeddings with HuggingFace all-MiniLM-L6-v2
 - Web fallback via Tavily when private evidence is insufficient
@@ -78,7 +78,7 @@ FDE_Agentic_RAG_IT_Copilot/
 3. Copy and configure environment variables
 
    cp .env.example .env
-   # Edit .env and fill in secrets: PINECONE_API_KEY, PINECONE_ENV, TAVILY_API_KEY, GROQ_API_KEY (or model settings), and any other required values.
+   # Edit .env and fill in GEMINI_API_KEY, PINECONE_API_KEY, and TAVILY_API_KEY.
 
 4. (Optional) Ingest the sample KB
 
@@ -109,7 +109,7 @@ Run (example):
 
    docker run --env-file .env -p 8000:8000 agentic-it-copilot:latest
 
-Note: Ensure any external services (Pinecone, Tavily, Groq) are accessible from the container and that credentials are present in the .env file.
+Note: Ensure any external services (Gemini, Pinecone, Tavily) are accessible from the container and that credentials are present in the .env file.
 
 ---
 
@@ -118,11 +118,12 @@ Note: Ensure any external services (Pinecone, Tavily, Groq) are accessible from 
 Important variables are shown in `.env.example`. Typical values you must provide:
 
 - PINECONE_API_KEY — Pinecone API key
-- PINECONE_ENV — Pinecone environment/region
 - PINECONE_INDEX_NAME — Name of the index used for private KB
+- PINECONE_NAMESPACE — Namespace used for private KB documents
 - TAVILY_API_KEY — API key for Tavily web search (fallback)
-- GROQ_API_KEY — Groq LLM API key (or model config details)
-- EMBEDDING_MODEL — (optional) embedding model id if configurable
+- GEMINI_API_KEY — Google Gemini API key for the configured model and embeddings
+- GEMINI_MODEL — Gemini model name (defaults to `gemini-3.8-flash`)
+- EMBEDDING_MODEL — Gemini embedding model name (defaults to `gemini-embedding-001`)
 
 Keep secrets out of source control. Use your preferred secret manager in production.
 
@@ -162,7 +163,7 @@ Please avoid adding secrets or large binary files to the repository.
 ## Troubleshooting
 
 - Pinecone errors: verify API key, index name, and that embeddings were successfully pushed.
-- LLM / Groq errors: check API key, model configuration, and rate limits.
+- Gemini errors: check the API key, model configuration, and rate limits.
 - Missing or stale KB answers: re-run ingestion after updating documents.
 
 If you need help, open an issue in the repository with logs and steps to reproduce.
@@ -178,4 +179,3 @@ This repository does not include a license file by default. Add a LICENSE file (
 ## Author
 
 Forward Deployed Engineer project by the repository owner.
-
